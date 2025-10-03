@@ -16,6 +16,7 @@ object MainViewModel {
     private var currentHistoryIndex = -1
     val inputText = mutableStateOf("")
     val isFocused = mutableStateOf(false)
+    private var runnedStartup = false
 
     fun onKeyPressed(keyEvent: KeyEvent): Boolean {
         when (keyEvent.key) {
@@ -25,7 +26,13 @@ object MainViewModel {
     }
 
     fun init() {
-        if (commandParser != null) history.value = commandParser!!.getOnBoot()
+        if (commandParser != null) {
+            if (!runnedStartup) {
+                history.value = commandParser!!.getOnBoot()
+                runnedStartup = true
+                commandParser!!.runStartup()
+            }
+        }
     }
 
     fun onKeyUpPressed() {
@@ -53,6 +60,7 @@ object MainViewModel {
     }
 
     fun processCommand(command: String) {
+        println(command)
         try {
             commandHistory.add(0, command)
             currentHistoryIndex = -1

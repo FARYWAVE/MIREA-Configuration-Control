@@ -81,6 +81,8 @@ class CommandParser(private val lazerSystem: LazerSystem) {
         )
     )
 
+    fun runStartup() = lazerSystem.runStartupScript()
+
     fun getPath() = "ROOT"
 
     private fun ls(arguments: List<String>): List<CommandParserResponse> {
