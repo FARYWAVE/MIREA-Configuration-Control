@@ -24,7 +24,6 @@ fun main(args: Array<String>) = application {
     MainViewModel.init()
     LazerSystem.Configuration.vfsPath = args.getOrNull(0) ?: System.getProperty("user.dir")
     LazerSystem.Configuration.startupScriptPath = args.getOrNull(1) ?: "../startups/startup1.txt"
-    system.runStartupScript()
     Window(
         onCloseRequest = ::exitApplication,
         title = "LazerDimOS700",
@@ -40,5 +39,6 @@ fun main(args: Array<String>) = application {
             }
         })
         App()
+        system.runStartupScript()
     }
 }
