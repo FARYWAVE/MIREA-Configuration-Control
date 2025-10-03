@@ -1,0 +1,5 @@
+CLEAR
+CONF-DUMP
+CD $TEMP
+UNKNOWN_COMMAND dwa d wadawd
+

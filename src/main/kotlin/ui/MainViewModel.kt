@@ -46,24 +46,28 @@ object MainViewModel {
 
     private fun onEnterPressed() {
         if (inputText.value.isNotEmpty() && commandParser != null) {
-            try {
-                commandHistory.add(0, inputText.value)
-                currentHistoryIndex = -1
-                val path = ":/${commandParser!!.getPath()}>"
-                history.value = history.value + CommandParserResponse(ResponseType.COMMAND, path + inputText.value)
-                val response = commandParser!!.call(inputText.value)
-                if (response[0].type == ResponseType.CLEAR) {
-                    history.value = emptyList()
-                    DisplayViewModel.typingIndex.value = 0
-                }
-                else history.value = history.value + response
-            } catch (e: Exception) {
-                history.value += CommandParserResponse(ResponseType.CRITICAL_ERROR, e.message)
-            } finally {
-                inputText.value = ""
-            }
+            processCommand(inputText.value)
         } else {
             skipAnimations();
+        }
+    }
+
+    fun processCommand(command: String) {
+        try {
+            commandHistory.add(0, command)
+            currentHistoryIndex = -1
+            val path = ":/${commandParser!!.getPath()}>"
+            history.value = history.value + CommandParserResponse(ResponseType.COMMAND, path + command)
+            val response = commandParser!!.call(command)
+            if (response[0].type == ResponseType.CLEAR) {
+                history.value = emptyList()
+                DisplayViewModel.typingIndex.value = 0
+            }
+            else history.value = history.value + response
+        } catch (e: Exception) {
+            history.value += CommandParserResponse(ResponseType.CRITICAL_ERROR, e.message)
+        } finally {
+            inputText.value = ""
         }
     }
 

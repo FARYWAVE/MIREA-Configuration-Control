@@ -26,7 +26,7 @@ fun Input(modifier: Modifier = Modifier) {
     ) {
         Text(":", color = Colors.Text, style = TextStyles.Normal)
         LazyRow(Modifier.wrapContentSize()) {
-            item { Text("ROOT", color = Colors.Text, style = TextStyles.Normal) }
+            item { Text("/ROOT", color = Colors.Text, style = TextStyles.Normal) }
         }
         Text(">", color = Colors.Text, style = TextStyles.Normal)
         val scrollState = rememberScrollState()

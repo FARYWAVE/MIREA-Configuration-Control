@@ -4,18 +4,22 @@ import domain.system.LazerSystemException
 import domain.system.LazerSystem
 
 class CommandParser(private val lazerSystem: LazerSystem) {
+    init {
+        lazerSystem.parser = this
+    }
     private data class Command(
         val name: String,
-        val argCount: Int,
         val invoke: (arguments: List<String>) -> List<CommandParserResponse>
     )
 
     private val commands = listOf(
-        Command("CD", -1) { arguments -> cd(arguments) },
-        Command("LS", -1) { arguments -> ls(arguments) },
-        Command("EXIT", 0) { _ -> exit() },
-        Command("COMMANDS", 0) { _ -> commands() },
-        Command("CLEAR", 0) { _ -> clear() },
+        Command("CD") { arguments -> cd(arguments) },
+        Command("LS") { arguments -> ls(arguments) },
+        Command("CONF-DUMP") { _ -> confDump() },
+        Command("RUN") { arguments -> runScript(arguments) },
+        Command("EXIT") { _ -> exit() },
+        Command("COMMANDS") { _ -> commands() },
+        Command("CLEAR") { _ -> clear() }
     )
 
     private fun searchCommands(command: String): List<String> {
@@ -30,6 +34,7 @@ class CommandParser(private val lazerSystem: LazerSystem) {
     }
 
     fun call(input: String): List<CommandParserResponse> {
+        val result = mutableListOf<CommandParserResponse>()
         try {
             val splitInput = input.split(' ')
             val command = splitInput[0]
@@ -38,30 +43,9 @@ class CommandParser(private val lazerSystem: LazerSystem) {
             val arguments = splitInput.drop(1).toList().map { lazerSystem.viewEnvironmentVariable(it) }
 
             if (suggestions.size == 1) {
-                val foundCommand = commands.find { it.name == suggestions[0] }!!
-
-                if (arguments.size == foundCommand.argCount || foundCommand.argCount == -1)
-                    return foundCommand.invoke(arguments)
-                else if (arguments.size < foundCommand.argCount)
-                    return listOf(
-                        CommandParserResponse(
-                            ResponseType.ERROR,
-                            "NOT ENOUGH ARGUMENTS GIVEN, ${foundCommand.argCount} REQUIRED"
-                        )
-                    )
-                else {
-                    val result = foundCommand.invoke(arguments).toMutableList()
-                    result.add(
-                        CommandParserResponse(
-                            ResponseType.NOTIFICATION,
-                            "REDUNDANT ARGUMENTS IGNORED, ONLY ${foundCommand.argCount} REQUIRED"
-                        )
-                    )
-                    return result.toList()
-                }
-
+                result.addAll(commands.find{ it.name === suggestions[0] }!!.invoke(arguments))
             } else {
-                return listOf(
+                result.add(
                     CommandParserResponse(
                         ResponseType.NOTIFICATION,
                         "COMMAND IS UNDEFINED, SUGGESTIONS:\n" +
@@ -70,13 +54,14 @@ class CommandParser(private val lazerSystem: LazerSystem) {
                 )
             }
         } catch (e: LazerSystemException) {
-            return listOf(
+            result.add(
                 CommandParserResponse(
                     ResponseType.ERROR,
                     "ERROR: ${e.reason} - ${e.message}"
                 )
             )
         }
+        return result
     }
 
     fun getOnBoot() = listOf(
@@ -114,6 +99,26 @@ class CommandParser(private val lazerSystem: LazerSystem) {
                 "CD " + arguments.joinToString(" ")
             )
         )
+    }
+
+    private fun confDump(): List<CommandParserResponse> {
+        return listOf(
+            CommandParserResponse(
+                ResponseType.TEXT,
+                lazerSystem.viewConfiguration()
+            )
+        )
+    }
+
+    private fun runScript(arguments: List<String>): List<CommandParserResponse> {
+        if (arguments.isEmpty()) return listOf(CommandParserResponse(ResponseType.ERROR, "NOT ENOUGH ARGUMENTS, PATH REQUIRED"))
+        lazerSystem.runScript(arguments[0])
+        if (arguments.size == 1) return listOf(CommandParserResponse(ResponseType.EMPTY))
+        else return listOf(CommandParserResponse(
+            ResponseType.NOTIFICATION,
+            "REDUNDANT ARGUMENTS IGNORED: ${arguments.subList(1, arguments.size).joinToString(" ")}"
+        ))
+
     }
 
     private fun exit(): List<CommandParserResponse> {

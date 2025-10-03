@@ -1,9 +1,11 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     kotlin("jvm")
     id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "com.example"
@@ -33,4 +35,14 @@ compose.desktop {
             packageVersion = "1.0.0"
         }
     }
+}
+
+tasks.withType<ShadowJar> {
+    archiveBaseName.set("myapp")
+    archiveClassifier.set("")
+    archiveVersion.set("1.0.0")
+    manifest {
+        attributes["Main-Class"] = "MainKt"
+    }
+    mergeServiceFiles()
 }

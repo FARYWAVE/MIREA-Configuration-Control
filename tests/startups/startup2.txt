@@ -1,0 +1,4 @@
+CLEAR
+CONF-DUMP
+LS "some random arguments"
+

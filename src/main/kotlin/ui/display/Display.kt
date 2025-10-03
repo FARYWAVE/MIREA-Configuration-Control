@@ -19,7 +19,7 @@ import ui.theme.Colors
 fun Display(modifier: Modifier = Modifier) {
     val listState = rememberLazyListState()
 
-    LaunchedEffect(MainViewModel.history.value.size, DisplayViewModel.scrollFlag.value) {
+    LaunchedEffect(MainViewModel.history.value.size, DisplayViewModel.scrollFlag.value, DisplayViewModel.typingIndex.value) {
         if (MainViewModel.history.value.isNotEmpty()) {
             withFrameNanos {}
             listState.animateScrollToItem(MainViewModel.history.value.size)

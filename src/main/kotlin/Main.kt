@@ -16,13 +16,15 @@ fun App() {
     Console(modifier = Modifier.fillMaxSize())
 }
 
-fun main() = application {
+fun main(args: Array<String>) = application {
     System.setProperty("skiko.renderApi", "SOFTWARE_COMPAT")
     val system = LazerSystem()
     val commandParser = CommandParser(system)
     MainViewModel.commandParser = commandParser
     MainViewModel.init()
-
+    LazerSystem.Configuration.vfsPath = args.getOrNull(0) ?: System.getProperty("user.dir")
+    LazerSystem.Configuration.startupScriptPath = args.getOrNull(1) ?: "../startups/startup1.txt"
+    system.runStartupScript()
     Window(
         onCloseRequest = ::exitApplication,
         title = "LazerDimOS700",
