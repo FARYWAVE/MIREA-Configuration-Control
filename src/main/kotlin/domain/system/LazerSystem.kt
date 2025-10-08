@@ -21,6 +21,7 @@ class LazerSystem {
             "     /___/"
 
     fun viewEnvironmentVariable(input: String): String {
+        if (input == "\$HOME") return System.getProperty("user.dir")
         val regex = "\\$[A-Za-z_][A-Za-z0-9_]*".toRegex()
         return regex.replace(input) { match ->
             val varName = match.value.substring(1)
